@@ -278,7 +278,7 @@ func getDronePlan(c echo.Context) error {
 				totalDistance += 10;																						
 				fmt.Println("totalDistance=",totalDistance)																																
 				fmt.Println("posisi di x=",x,"y=",y)															
-				nextX = x + 1
+				nextX = x - 1
 				if height, ok := treeMap[[2]int{x, y}]; ok {
 					fmt.Println("ada pohon di height=",height)																	
 					if height2, ok := treeMap[[2]int{nextX, y}]; ok {
