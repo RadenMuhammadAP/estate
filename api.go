@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"database/sql"
 	"log"
 	"net/http"
@@ -45,11 +44,13 @@ func createTables() error {
 	);`
 
 	if _, err := db.Exec(estateTable); err != nil {
-		return fmt.Errorf("failed to create estates table: %w", err)
+		log.Printf("failed to create estates table: %v", err)
+		return err
 	}
 
 	if _, err := db.Exec(treeTable); err != nil {
-		return fmt.Errorf("failed to create trees table: %w", err)
+		log.Printf("failed to create trees table: %v", err)
+		return err
 	}
 
 	return nil
@@ -221,10 +222,10 @@ func getDronePlan(c echo.Context) error {
 				if(x == 1 && y == 1){
 					totalDistance += 1;
 					vertically += 1;	
-					fmt.Println(vertically," meter vertically, total distance :",totalDistance)										
+					log.Println(vertically," meter vertically, total distance :",totalDistance)										
 					nextX = x + 1
 					if height, ok := treeMap[[2]int{nextX, y}]; ok {
-						fmt.Println("there is a next tree on x=",nextX,"y=",y," with height=",height)
+						log.Println("there is a next tree on x=",nextX,"y=",y," with height=",height)
 						shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
 						if err != nil {
 							return err
@@ -234,7 +235,7 @@ func getDronePlan(c echo.Context) error {
 						}
 						totalDistance += height;
 						vertically += height;
-						fmt.Println(vertically," meter vertically, total distance :",totalDistance)																
+						log.Println(vertically," meter vertically, total distance :",totalDistance)																
 						shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
 						if err != nil {
 							return err
@@ -246,7 +247,7 @@ func getDronePlan(c echo.Context) error {
 				}else{
 					totalDistance += 10;
 					horizontally += 10;	
-					fmt.Println(horizontally," meter horizontally, totalDistance=",totalDistance)
+					log.Println(horizontally," meter horizontally, totalDistance=",totalDistance)
 					shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
 					if err != nil {
 						return err
@@ -254,14 +255,14 @@ func getDronePlan(c echo.Context) error {
 					if shouldBreak {
 						break
 					}
-					fmt.Println("now,the position is x=",x,"y=",y)															
+					log.Println("now,the position is x=",x,"y=",y)															
 					nextX = x + 1
 					if height, ok := treeMap[[2]int{x, y}]; ok {
 						if height2, ok := treeMap[[2]int{nextX, y}]; ok {
-							fmt.Println("there is a next tree on x=",nextX," y=",y," with height=",height)
+							log.Println("there is a next tree on x=",nextX," y=",y," with height=",height)
 							totalDistance += abs(height - height2);
 							vertically += abs(height - height2);
-							fmt.Println(vertically," meter vertically, totalDistance=",totalDistance)																																														
+							log.Println(vertically," meter vertically, totalDistance=",totalDistance)																																														
 							shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
 							if err != nil {
 								return err
@@ -270,7 +271,7 @@ func getDronePlan(c echo.Context) error {
 								break
 							}
 						}else if(nextX == lastX && y ==lastY){
-						    fmt.Println("now,the next is the last position on x=",nextX," y=",y)																						
+						    log.Println("now,the next is the last position on x=",nextX," y=",y)																						
 							totalDistance += 10;
 							horizontally += 10;	
 							shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
@@ -282,10 +283,10 @@ func getDronePlan(c echo.Context) error {
 							}							
 							x = lastX;
 							y = lastY;							
-							fmt.Println(horizontally," meter horizontally, totalDistance=",totalDistance)
+							log.Println(horizontally," meter horizontally, totalDistance=",totalDistance)
 							totalDistance += height;
 							vertically += height;	
-							fmt.Println(vertically," meter vertically, totalDistance=",totalDistance)																																							
+							log.Println(vertically," meter vertically, totalDistance=",totalDistance)																																							
 							shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
 							if err != nil {
 								return err
@@ -295,7 +296,7 @@ func getDronePlan(c echo.Context) error {
 							}
 							totalDistance += 1;
 							vertically += 1;
-						    fmt.Println(vertically," meter vertically, totalDistance=",totalDistance)																																								
+						    log.Println(vertically," meter vertically, totalDistance=",totalDistance)																																								
 							shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
 							if err != nil {
 								return err
@@ -308,7 +309,7 @@ func getDronePlan(c echo.Context) error {
 							totalDistance += height;							
 						}
 					}else if height, ok := treeMap[[2]int{nextX, y}]; ok {
-						fmt.Println("now,there is a next tree on x=",nextX," y=",y)																						
+						log.Println("now,there is a next tree on x=",nextX," y=",y)																						
 						shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
 						if err != nil {
 							return err
@@ -318,7 +319,7 @@ func getDronePlan(c echo.Context) error {
 						}
 						totalDistance += height;
 						vertically += height;	
-						fmt.Println(vertically," meter vertically, totalDistance=",totalDistance)							
+						log.Println(vertically," meter vertically, totalDistance=",totalDistance)							
 						shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
 						if err != nil {
 							return err
@@ -338,11 +339,11 @@ func getDronePlan(c echo.Context) error {
 						}
 						x = lastX;
 						y = lastY;							
-						fmt.Println("now,the next is 2 the last position on x=",x," y=",y)																						
-						fmt.Println(horizontally," meter horizontally, totalDistance=",totalDistance)							
+						log.Println("now,the next is 2 the last position on x=",x," y=",y)																						
+						log.Println(horizontally," meter horizontally, totalDistance=",totalDistance)							
 						totalDistance += height;							
 						vertically += height;	
-						fmt.Println(vertically," meter vertically, totalDistance=",totalDistance)
+						log.Println(vertically," meter vertically, totalDistance=",totalDistance)
 						shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
 						if err != nil {
 							return err
@@ -359,7 +360,7 @@ func getDronePlan(c echo.Context) error {
 						if shouldBreak {
 							break
 						}
-						fmt.Println(vertically," meter vertically, totalDistance=",totalDistance)							
+						log.Println(vertically," meter vertically, totalDistance=",totalDistance)							
 						break;
 					}	
 				}
@@ -371,7 +372,7 @@ func getDronePlan(c echo.Context) error {
 			for x := length; x >= 1; x-- {					
 				totalDistance += 10;
 				horizontally += 10;	
-				fmt.Println(horizontally," meter horizontally, totalDistance=",totalDistance)
+				log.Println(horizontally," meter horizontally, totalDistance=",totalDistance)
 				shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
 				if err != nil {
 					return err
@@ -379,14 +380,14 @@ func getDronePlan(c echo.Context) error {
 				if shouldBreak {
 					break
 				}
-				fmt.Println("now,the position is x=",x,"y=",y)															
+				log.Println("now,the position is x=",x,"y=",y)															
 				nextX = x - 1
 				if height, ok := treeMap[[2]int{x, y}]; ok {
 					if height2, ok := treeMap[[2]int{nextX, y}]; ok {
-						fmt.Println("there is a next tree on x=",nextX," y=",y," with height=",height)
+						log.Println("there is a next tree on x=",nextX," y=",y," with height=",height)
 						totalDistance += abs(height - height2);
 						vertically += abs(height - height2);
-						fmt.Println(vertically," meter vertically, totalDistance=",totalDistance)																																														
+						log.Println(vertically," meter vertically, totalDistance=",totalDistance)																																														
 						shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
 						if err != nil {
 							return err
@@ -395,7 +396,7 @@ func getDronePlan(c echo.Context) error {
 							break
 						}
 					}else if(nextX == lastX && y ==lastY){
-						fmt.Println("now,the next is the last position on x=",nextX," y=",y)																						
+						log.Println("now,the next is the last position on x=",nextX," y=",y)																						
 						totalDistance += 10;
 						horizontally += 10;	
 						shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
@@ -407,10 +408,10 @@ func getDronePlan(c echo.Context) error {
 						}							
 						x = lastX;
 						y = lastY;							
-						fmt.Println(horizontally," meter horizontally, totalDistance=",totalDistance)
+						log.Println(horizontally," meter horizontally, totalDistance=",totalDistance)
 						totalDistance += height;
 						vertically += height;	
-						fmt.Println(vertically," meter vertically, totalDistance=",totalDistance)																																							
+						log.Println(vertically," meter vertically, totalDistance=",totalDistance)																																							
 						shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
 						if err != nil {
 							return err
@@ -420,7 +421,7 @@ func getDronePlan(c echo.Context) error {
 						}
 						totalDistance += 1;
 						vertically += 1;
-						fmt.Println(vertically," meter vertically, totalDistance=",totalDistance)																																								
+						log.Println(vertically," meter vertically, totalDistance=",totalDistance)																																								
 						shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
 						if err != nil {
 							return err
@@ -433,7 +434,7 @@ func getDronePlan(c echo.Context) error {
 						totalDistance += height;							
 					}
 				}else if height, ok := treeMap[[2]int{nextX, y}]; ok {
-					fmt.Println("now,there is a next tree on x=",nextX," y=",y)																						
+					log.Println("now,there is a next tree on x=",nextX," y=",y)																						
 					shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
 					if err != nil {
 						return err
@@ -443,7 +444,7 @@ func getDronePlan(c echo.Context) error {
 					}
 					totalDistance += height;
 					vertically += height;	
-					fmt.Println(vertically," meter vertically, totalDistance=",totalDistance)							
+					log.Println(vertically," meter vertically, totalDistance=",totalDistance)							
 					shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
 					if err != nil {
 						return err
@@ -463,11 +464,11 @@ func getDronePlan(c echo.Context) error {
 					}
 					x = lastX;
 					y = lastY;							
-					fmt.Println("now,the next is 2 the last position on x=",x," y=",y)																						
-					fmt.Println(horizontally," meter horizontally, totalDistance=",totalDistance)							
+					log.Println("now,the next is 2 the last position on x=",x," y=",y)																						
+					log.Println(horizontally," meter horizontally, totalDistance=",totalDistance)							
 					totalDistance += height;							
 					vertically += height;	
-					fmt.Println(vertically," meter vertically, totalDistance=",totalDistance)
+					log.Println(vertically," meter vertically, totalDistance=",totalDistance)
 					shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
 					if err != nil {
 						return err
@@ -484,7 +485,7 @@ func getDronePlan(c echo.Context) error {
 					if shouldBreak {
 						break
 					}
-					fmt.Println(vertically," meter vertically, totalDistance=",totalDistance)							
+					log.Println(vertically," meter vertically, totalDistance=",totalDistance)							
 					break;
 				}								
 			}							
@@ -503,6 +504,101 @@ func abs(x int) int {
 	return x
 }
 
+func moveRightAndCheck(
+	c echo.Context,
+	treeMap map[[2]int]int,
+	x, y, lastX, lastY int,
+	totalDistance, horizontally, vertically *int,
+	maxDistanceInt int,
+) (newX, newY int, shouldBreak bool, err error) {
+	
+	*totalDistance += 10
+	*horizontally += 10
+	log.Println(*horizontally, " meter horizontally, totalDistance=", *totalDistance)
+
+	shouldBreak, err = checkMaxDistance(c, *totalDistance, maxDistanceInt, x, y)
+	if err != nil || shouldBreak {
+		return x, y, shouldBreak, err
+	}
+
+	log.Println("now, the position is x=", x, "y=", y)
+	nextX := x + 1
+
+	height, ok := treeMap[[2]int{x, y}]
+	height2, ok2 := treeMap[[2]int{nextX, y}]
+
+	switch {
+	case ok && ok2:
+		log.Println("there is a next tree on x=", nextX, " y=", y, " with height=", height)
+		diff := abs(height - height2)
+		*totalDistance += diff
+		*vertically += diff
+		log.Println(*vertically, " meter vertically, totalDistance=", *totalDistance)
+		shouldBreak, err = checkMaxDistance(c, *totalDistance, maxDistanceInt, x, y)
+		if err != nil || shouldBreak {
+			return x, y, shouldBreak, err
+		}
+	case ok && (nextX == lastX && y == lastY):
+		log.Println("now, the next is the last position on x=", nextX, " y=", y)
+		*totalDistance += 10
+		*horizontally += 10
+		shouldBreak, err = checkMaxDistance(c, *totalDistance, maxDistanceInt, x, y)
+		if err != nil || shouldBreak {
+			return x, y, shouldBreak, err
+		}
+		x, y = lastX, lastY
+		log.Println(*horizontally, " meter horizontally, totalDistance=", *totalDistance)
+		*totalDistance += height
+		*vertically += height
+		log.Println(*vertically, " meter vertically, totalDistance=", *totalDistance)
+		shouldBreak, err = checkMaxDistance(c, *totalDistance, maxDistanceInt, x, y)
+		if err != nil || shouldBreak {
+			return x, y, shouldBreak, err
+		}
+		*totalDistance += 1
+		*vertically += 1
+		log.Println(*vertically, " meter vertically, totalDistance=", *totalDistance)
+		shouldBreak, err = checkMaxDistance(c, *totalDistance, maxDistanceInt, x, y)
+		return x, y, shouldBreak, err
+	case !ok && ok2:
+		log.Println("now, there is a next tree on x=", nextX, " y=", y)
+		shouldBreak, err = checkMaxDistance(c, *totalDistance, maxDistanceInt, x, y)
+		if err != nil || shouldBreak {
+			return x, y, shouldBreak, err
+		}
+		*totalDistance += height2
+		*vertically += height2
+		log.Println(*vertically, " meter vertically, totalDistance=", *totalDistance)
+		shouldBreak, err = checkMaxDistance(c, *totalDistance, maxDistanceInt, x, y)
+		return x, y, shouldBreak, err
+	case !ok && !ok2 && (nextX == lastX && y == lastY):
+		*totalDistance += 10
+		*horizontally += 10
+		shouldBreak, err = checkMaxDistance(c, *totalDistance, maxDistanceInt, x, y)
+		if err != nil || shouldBreak {
+			return x, y, shouldBreak, err
+		}
+		x, y = lastX, lastY
+		log.Println("now, the next is 2 the last position on x=", x, " y=", y)
+		log.Println(*horizontally, " meter horizontally, totalDistance=", *totalDistance)
+		*totalDistance += height
+		*vertically += height
+		log.Println(*vertically, " meter vertically, totalDistance=", *totalDistance)
+		shouldBreak, err = checkMaxDistance(c, *totalDistance, maxDistanceInt, x, y)
+		if err != nil || shouldBreak {
+			return x, y, shouldBreak, err
+		}
+		*totalDistance += 1
+		*vertically += 1
+		log.Println(*vertically, " meter vertically, totalDistance=", *totalDistance)
+		shouldBreak, err = checkMaxDistance(c, *totalDistance, maxDistanceInt, x, y)
+		return x, y, shouldBreak, err
+	case ok:
+		*totalDistance += height
+	}
+
+	return nextX, y, false, nil
+}
 
 
 func main() {
