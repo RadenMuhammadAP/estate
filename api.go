@@ -157,17 +157,6 @@ func calculateMedian(data []int) float64 {
     return float64(data[n/2])
 }
 
-func checkMaxDistance(c echo.Context, distance, max, x, y int) (bool, error){
-	if max > 0 && distance > max {
-		return true,c.JSON(http.StatusOK, map[string]interface{}{
-			"rest":    map[string]int{"x": x, "y": y},
-			"distance": max,
-		})
-	}else{
-		return false, nil			
-	}
-}
-
 func getDronePlan(c echo.Context) error {
 	treeMap := make(map[[2]int]int)
 	estateID := c.Param("id")
@@ -219,41 +208,57 @@ func getDronePlan(c echo.Context) error {
 	for y := 1; y <= width; y++ {				
 		if y%2 == 1 {
 			for x := 1; x <= length; x++ {
-				if(x == 1 && y == 1){
+				if(x == lastX && y == lastY){
+					totalDistance += 1;
+					vertically += 1;						
+					log.Println(vertically," meter vertically, total distance :",totalDistance)										
+					if maxDistanceInt > 0 && totalDistance > maxDistanceInt {
+						return c.JSON(http.StatusOK, map[string]interface{}{
+							"rest":    map[string]int{"x": x, "y": y},
+							"distance":maxDistanceInt,
+						})
+					}					
+					totalDistance += 1;
+					vertically += 1;	
+					log.Println(vertically," meter vertically, total distance :",totalDistance)															
+					if maxDistanceInt > 0 && totalDistance > maxDistanceInt {
+						return c.JSON(http.StatusOK, map[string]interface{}{
+							"rest":    map[string]int{"x": x, "y": y},
+							"distance":maxDistanceInt,
+						})
+					}					
+				}else if(x == 1 && y == 1){
 					totalDistance += 1;
 					vertically += 1;	
 					log.Println(vertically," meter vertically, total distance :",totalDistance)										
 					nextX = x + 1
 					if height, ok := treeMap[[2]int{nextX, y}]; ok {
 						log.Println("there is a next tree on x=",nextX,"y=",y," with height=",height)
-						shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
-						if err != nil {
-							return err
-						}
-						if shouldBreak {
-							break
+						if maxDistanceInt > 0 && totalDistance > maxDistanceInt {
+							return c.JSON(http.StatusOK, map[string]interface{}{
+								"rest":    map[string]int{"x": x, "y": y},
+								"distance":maxDistanceInt,
+							})
 						}
 						totalDistance += height;
 						vertically += height;
 						log.Println(vertically," meter vertically, total distance :",totalDistance)																
-						shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
-						if err != nil {
-							return err
-						}
-						if shouldBreak {
-							break
+						if maxDistanceInt > 0 && totalDistance > maxDistanceInt {
+							return c.JSON(http.StatusOK, map[string]interface{}{
+								"rest":    map[string]int{"x": x, "y": y},
+								"distance":maxDistanceInt,
+							})
 						}
 					}																			
 				}else{
 					totalDistance += 10;
 					horizontally += 10;	
 					log.Println(horizontally," meter horizontally, totalDistance=",totalDistance)
-					shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
-					if err != nil {
-						return err
-					}
-					if shouldBreak {
-						break
+					if maxDistanceInt > 0 && totalDistance > maxDistanceInt {
+						return c.JSON(http.StatusOK, map[string]interface{}{
+							"rest":    map[string]int{"x": x, "y": y},
+							"distance":maxDistanceInt,
+						})
 					}
 					log.Println("now,the position is x=",x,"y=",y)															
 					nextX = x + 1
@@ -263,46 +268,42 @@ func getDronePlan(c echo.Context) error {
 							totalDistance += abs(height - height2);
 							vertically += abs(height - height2);
 							log.Println(vertically," meter vertically, totalDistance=",totalDistance)																																														
-							shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
-							if err != nil {
-								return err
-							}
-							if shouldBreak {
-								break
+							if maxDistanceInt > 0 && totalDistance > maxDistanceInt {
+								return c.JSON(http.StatusOK, map[string]interface{}{
+									"rest":    map[string]int{"x": x, "y": y},
+									"distance":maxDistanceInt,
+								})
 							}
 						}else if(nextX == lastX && y ==lastY){
 						    log.Println("now,the next is the last position on x=",nextX," y=",y)																						
 							totalDistance += 10;
 							horizontally += 10;	
-							shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
-							if err != nil {
-								return err
+							if maxDistanceInt > 0 && totalDistance > maxDistanceInt {
+								return c.JSON(http.StatusOK, map[string]interface{}{
+									"rest":    map[string]int{"x": x, "y": y},
+									"distance":maxDistanceInt,
+								})
 							}
-							if shouldBreak {
-								break
-							}							
 							x = lastX;
 							y = lastY;							
 							log.Println(horizontally," meter horizontally, totalDistance=",totalDistance)
 							totalDistance += height;
 							vertically += height;	
 							log.Println(vertically," meter vertically, totalDistance=",totalDistance)																																							
-							shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
-							if err != nil {
-								return err
-							}
-							if shouldBreak {
-								break
+							if maxDistanceInt > 0 && totalDistance > maxDistanceInt {
+								return c.JSON(http.StatusOK, map[string]interface{}{
+									"rest":    map[string]int{"x": x, "y": y},
+									"distance":maxDistanceInt,
+								})
 							}
 							totalDistance += 1;
 							vertically += 1;
 						    log.Println(vertically," meter vertically, totalDistance=",totalDistance)																																								
-							shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
-							if err != nil {
-								return err
-							}
-							if shouldBreak {
-								break
+							if maxDistanceInt > 0 && totalDistance > maxDistanceInt {
+								return c.JSON(http.StatusOK, map[string]interface{}{
+									"rest":    map[string]int{"x": x, "y": y},
+									"distance":maxDistanceInt,
+								})
 							}
 							break;
 						}else{
@@ -310,32 +311,29 @@ func getDronePlan(c echo.Context) error {
 						}
 					}else if height, ok := treeMap[[2]int{nextX, y}]; ok {
 						log.Println("now,there is a next tree on x=",nextX," y=",y)																						
-						shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
-						if err != nil {
-							return err
-						}
-						if shouldBreak {
-							break
+						if maxDistanceInt > 0 && totalDistance > maxDistanceInt {
+							return c.JSON(http.StatusOK, map[string]interface{}{
+								"rest":    map[string]int{"x": x, "y": y},
+								"distance":maxDistanceInt,
+							})
 						}
 						totalDistance += height;
 						vertically += height;	
 						log.Println(vertically," meter vertically, totalDistance=",totalDistance)							
-						shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
-						if err != nil {
-							return err
-						}
-						if shouldBreak {
-							break
+						if maxDistanceInt > 0 && totalDistance > maxDistanceInt {
+							return c.JSON(http.StatusOK, map[string]interface{}{
+								"rest":    map[string]int{"x": x, "y": y},
+								"distance":maxDistanceInt,
+							})
 						}
 					}else if(nextX == lastX && y ==lastY){
 						totalDistance += 10;																													
 						horizontally += 10;	
-						shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
-						if err != nil {
-							return err
-						}
-						if shouldBreak {
-							break
+						if maxDistanceInt > 0 && totalDistance > maxDistanceInt {
+							return c.JSON(http.StatusOK, map[string]interface{}{
+								"rest":    map[string]int{"x": x, "y": y},
+								"distance":maxDistanceInt,
+							})
 						}
 						x = lastX;
 						y = lastY;							
@@ -344,21 +342,19 @@ func getDronePlan(c echo.Context) error {
 						totalDistance += height;							
 						vertically += height;	
 						log.Println(vertically," meter vertically, totalDistance=",totalDistance)
-						shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
-						if err != nil {
-							return err
-						}
-						if shouldBreak {
-							break
+						if maxDistanceInt > 0 && totalDistance > maxDistanceInt {
+							return c.JSON(http.StatusOK, map[string]interface{}{
+								"rest":    map[string]int{"x": x, "y": y},
+								"distance":maxDistanceInt,
+							})
 						}
 						vertically += 1;
 						totalDistance += 1;
-						shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
-						if err != nil {
-							return err
-						}
-						if shouldBreak {
-							break
+						if maxDistanceInt > 0 && totalDistance > maxDistanceInt {
+							return c.JSON(http.StatusOK, map[string]interface{}{
+								"rest":    map[string]int{"x": x, "y": y},
+								"distance":maxDistanceInt,
+							})
 						}
 						log.Println(vertically," meter vertically, totalDistance=",totalDistance)							
 						break;
@@ -366,128 +362,115 @@ func getDronePlan(c echo.Context) error {
 				}
 			}
 		}else {
-			if shouldBreak {
-				break
-			}			
 			for x := length; x >= 1; x-- {					
-				totalDistance += 10;
-				horizontally += 10;	
-				log.Println(horizontally," meter horizontally, totalDistance=",totalDistance)
-				shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
-				if err != nil {
-					return err
-				}
-				if shouldBreak {
-					break
-				}
-				log.Println("now,the position is x=",x,"y=",y)															
-				nextX = x - 1
-				if height, ok := treeMap[[2]int{x, y}]; ok {
-					if height2, ok := treeMap[[2]int{nextX, y}]; ok {
-						log.Println("there is a next tree on x=",nextX," y=",y," with height=",height)
-						totalDistance += abs(height - height2);
-						vertically += abs(height - height2);
-						log.Println(vertically," meter vertically, totalDistance=",totalDistance)																																														
-						shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
-						if err != nil {
-							return err
+					totalDistance += 10;
+					horizontally += 10;	
+					log.Println(horizontally," meter horizontally, totalDistance=",totalDistance)
+					if maxDistanceInt > 0 && totalDistance > maxDistanceInt {
+						return c.JSON(http.StatusOK, map[string]interface{}{
+							"rest":    map[string]int{"x": x, "y": y},
+							"distance":maxDistanceInt,
+						})
+					}
+					log.Println("now,the position is x=",x,"y=",y)															
+					nextX = x + 1
+					if height, ok := treeMap[[2]int{x, y}]; ok {
+						if height2, ok := treeMap[[2]int{nextX, y}]; ok {
+							log.Println("there is a next tree on x=",nextX," y=",y," with height=",height)
+							totalDistance += abs(height - height2);
+							vertically += abs(height - height2);
+							log.Println(vertically," meter vertically, totalDistance=",totalDistance)																																														
+							if maxDistanceInt > 0 && totalDistance > maxDistanceInt {
+								return c.JSON(http.StatusOK, map[string]interface{}{
+									"rest":    map[string]int{"x": x, "y": y},
+									"distance":maxDistanceInt,
+								})
+							}
+						}else if(nextX == lastX && y ==lastY){
+						    log.Println("now,the next is the last position on x=",nextX," y=",y)																						
+							totalDistance += 10;
+							horizontally += 10;	
+							if maxDistanceInt > 0 && totalDistance > maxDistanceInt {
+								return c.JSON(http.StatusOK, map[string]interface{}{
+									"rest":    map[string]int{"x": x, "y": y},
+									"distance":maxDistanceInt,
+								})
+							}
+							x = lastX;
+							y = lastY;							
+							log.Println(horizontally," meter horizontally, totalDistance=",totalDistance)
+							totalDistance += height;
+							vertically += height;	
+							log.Println(vertically," meter vertically, totalDistance=",totalDistance)																																							
+							if maxDistanceInt > 0 && totalDistance > maxDistanceInt {
+								return c.JSON(http.StatusOK, map[string]interface{}{
+									"rest":    map[string]int{"x": x, "y": y},
+									"distance":maxDistanceInt,
+								})
+							}
+							totalDistance += 1;
+							vertically += 1;
+						    log.Println(vertically," meter vertically, totalDistance=",totalDistance)																																								
+							if maxDistanceInt > 0 && totalDistance > maxDistanceInt {
+								return c.JSON(http.StatusOK, map[string]interface{}{
+									"rest":    map[string]int{"x": x, "y": y},
+									"distance":maxDistanceInt,
+								})
+							}
+							break;
+						}else{
+							totalDistance += height;							
 						}
-						if shouldBreak {
-							break
+					}else if height, ok := treeMap[[2]int{nextX, y}]; ok {
+						log.Println("now,there is a next tree on x=",nextX," y=",y)																						
+						if maxDistanceInt > 0 && totalDistance > maxDistanceInt {
+							return c.JSON(http.StatusOK, map[string]interface{}{
+								"rest":    map[string]int{"x": x, "y": y},
+								"distance":maxDistanceInt,
+							})
 						}
-					}else if(nextX == lastX && y ==lastY){
-						log.Println("now,the next is the last position on x=",nextX," y=",y)																						
-						totalDistance += 10;
-						horizontally += 10;	
-						shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
-						if err != nil {
-							return err
-						}
-						if shouldBreak {
-							break
-						}							
-						x = lastX;
-						y = lastY;							
-						log.Println(horizontally," meter horizontally, totalDistance=",totalDistance)
 						totalDistance += height;
 						vertically += height;	
-						log.Println(vertically," meter vertically, totalDistance=",totalDistance)																																							
-						shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
-						if err != nil {
-							return err
+						log.Println(vertically," meter vertically, totalDistance=",totalDistance)							
+						if maxDistanceInt > 0 && totalDistance > maxDistanceInt {
+							return c.JSON(http.StatusOK, map[string]interface{}{
+								"rest":    map[string]int{"x": x, "y": y},
+								"distance":maxDistanceInt,
+							})
 						}
-						if shouldBreak {
-							break
+					}else if(nextX == lastX && y ==lastY){
+						totalDistance += 10;																													
+						horizontally += 10;	
+						if maxDistanceInt > 0 && totalDistance > maxDistanceInt {
+							return c.JSON(http.StatusOK, map[string]interface{}{
+								"rest":    map[string]int{"x": x, "y": y},
+								"distance":maxDistanceInt,
+							})
 						}
-						totalDistance += 1;
-						vertically += 1;
-						log.Println(vertically," meter vertically, totalDistance=",totalDistance)																																								
-						shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
-						if err != nil {
-							return err
-						}
-						if shouldBreak {
-							break
-						}
-						break;
-					}else{
+						x = lastX;
+						y = lastY;							
+						log.Println("now,the next is 2 the last position on x=",x," y=",y)																						
+						log.Println(horizontally," meter horizontally, totalDistance=",totalDistance)							
 						totalDistance += height;							
-					}
-				}else if height, ok := treeMap[[2]int{nextX, y}]; ok {
-					log.Println("now,there is a next tree on x=",nextX," y=",y)																						
-					shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
-					if err != nil {
-						return err
-					}
-					if shouldBreak {
-						break
-					}
-					totalDistance += height;
-					vertically += height;	
-					log.Println(vertically," meter vertically, totalDistance=",totalDistance)							
-					shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
-					if err != nil {
-						return err
-					}
-					if shouldBreak {
-						break
-					}
-				}else if(nextX == lastX && y ==lastY){
-					totalDistance += 10;																													
-					horizontally += 10;	
-					shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
-					if err != nil {
-						return err
-					}
-					if shouldBreak {
-						break
-					}
-					x = lastX;
-					y = lastY;							
-					log.Println("now,the next is 2 the last position on x=",x," y=",y)																						
-					log.Println(horizontally," meter horizontally, totalDistance=",totalDistance)							
-					totalDistance += height;							
-					vertically += height;	
-					log.Println(vertically," meter vertically, totalDistance=",totalDistance)
-					shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
-					if err != nil {
-						return err
-					}
-					if shouldBreak {
-						break
-					}
-					vertically += 1;
-					totalDistance += 1;
-					shouldBreak, err = checkMaxDistance(c, totalDistance, maxDistanceInt, x, y)
-					if err != nil {
-						return err
-					}
-					if shouldBreak {
-						break
-					}
-					log.Println(vertically," meter vertically, totalDistance=",totalDistance)							
-					break;
-				}								
+						vertically += height;	
+						log.Println(vertically," meter vertically, totalDistance=",totalDistance)
+						if maxDistanceInt > 0 && totalDistance > maxDistanceInt {
+							return c.JSON(http.StatusOK, map[string]interface{}{
+								"rest":    map[string]int{"x": x, "y": y},
+								"distance":maxDistanceInt,
+							})
+						}
+						vertically += 1;
+						totalDistance += 1;
+						if maxDistanceInt > 0 && totalDistance > maxDistanceInt {
+							return c.JSON(http.StatusOK, map[string]interface{}{
+								"rest":    map[string]int{"x": x, "y": y},
+								"distance":maxDistanceInt,
+							})
+						}
+						log.Println(vertically," meter vertically, totalDistance=",totalDistance)							
+						break;
+					}			
 			}							
 		}
 	}
@@ -507,97 +490,11 @@ func abs(x int) int {
 func moveRightAndCheck(
 	c echo.Context,
 	treeMap map[[2]int]int,
-	x, y, lastX, lastY int,
-	totalDistance, horizontally, vertically *int,
+	x int, y int, lastX int, lastY int,
+	totalDistance, horizontally, vertically int,
 	maxDistanceInt int,
-) (newX, newY int, shouldBreak bool, err error) {
-	
-	*totalDistance += 10
-	*horizontally += 10
-	log.Println(*horizontally, " meter horizontally, totalDistance=", *totalDistance)
-
-	shouldBreak, err = checkMaxDistance(c, *totalDistance, maxDistanceInt, x, y)
-	if err != nil || shouldBreak {
-		return x, y, shouldBreak, err
-	}
-
-	log.Println("now, the position is x=", x, "y=", y)
-	nextX := x + 1
-
-	height, ok := treeMap[[2]int{x, y}]
-	height2, ok2 := treeMap[[2]int{nextX, y}]
-
-	switch {
-	case ok && ok2:
-		log.Println("there is a next tree on x=", nextX, " y=", y, " with height=", height)
-		diff := abs(height - height2)
-		*totalDistance += diff
-		*vertically += diff
-		log.Println(*vertically, " meter vertically, totalDistance=", *totalDistance)
-		shouldBreak, err = checkMaxDistance(c, *totalDistance, maxDistanceInt, x, y)
-		if err != nil || shouldBreak {
-			return x, y, shouldBreak, err
-		}
-	case ok && (nextX == lastX && y == lastY):
-		log.Println("now, the next is the last position on x=", nextX, " y=", y)
-		*totalDistance += 10
-		*horizontally += 10
-		shouldBreak, err = checkMaxDistance(c, *totalDistance, maxDistanceInt, x, y)
-		if err != nil || shouldBreak {
-			return x, y, shouldBreak, err
-		}
-		x, y = lastX, lastY
-		log.Println(*horizontally, " meter horizontally, totalDistance=", *totalDistance)
-		*totalDistance += height
-		*vertically += height
-		log.Println(*vertically, " meter vertically, totalDistance=", *totalDistance)
-		shouldBreak, err = checkMaxDistance(c, *totalDistance, maxDistanceInt, x, y)
-		if err != nil || shouldBreak {
-			return x, y, shouldBreak, err
-		}
-		*totalDistance += 1
-		*vertically += 1
-		log.Println(*vertically, " meter vertically, totalDistance=", *totalDistance)
-		shouldBreak, err = checkMaxDistance(c, *totalDistance, maxDistanceInt, x, y)
-		return x, y, shouldBreak, err
-	case !ok && ok2:
-		log.Println("now, there is a next tree on x=", nextX, " y=", y)
-		shouldBreak, err = checkMaxDistance(c, *totalDistance, maxDistanceInt, x, y)
-		if err != nil || shouldBreak {
-			return x, y, shouldBreak, err
-		}
-		*totalDistance += height2
-		*vertically += height2
-		log.Println(*vertically, " meter vertically, totalDistance=", *totalDistance)
-		shouldBreak, err = checkMaxDistance(c, *totalDistance, maxDistanceInt, x, y)
-		return x, y, shouldBreak, err
-	case !ok && !ok2 && (nextX == lastX && y == lastY):
-		*totalDistance += 10
-		*horizontally += 10
-		shouldBreak, err = checkMaxDistance(c, *totalDistance, maxDistanceInt, x, y)
-		if err != nil || shouldBreak {
-			return x, y, shouldBreak, err
-		}
-		x, y = lastX, lastY
-		log.Println("now, the next is 2 the last position on x=", x, " y=", y)
-		log.Println(*horizontally, " meter horizontally, totalDistance=", *totalDistance)
-		*totalDistance += height
-		*vertically += height
-		log.Println(*vertically, " meter vertically, totalDistance=", *totalDistance)
-		shouldBreak, err = checkMaxDistance(c, *totalDistance, maxDistanceInt, x, y)
-		if err != nil || shouldBreak {
-			return x, y, shouldBreak, err
-		}
-		*totalDistance += 1
-		*vertically += 1
-		log.Println(*vertically, " meter vertically, totalDistance=", *totalDistance)
-		shouldBreak, err = checkMaxDistance(c, *totalDistance, maxDistanceInt, x, y)
-		return x, y, shouldBreak, err
-	case ok:
-		*totalDistance += height
-	}
-
-	return nextX, y, false, nil
+) {
+		
 }
 
 
